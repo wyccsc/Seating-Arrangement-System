@@ -1,16 +1,10 @@
 # Seating Arrangement System
 
-## 環境需求
-
-**Docker Compose（建議）**
-
-- Docker、Docker Compose
-
 **本機開發**
 
 - Java 17、Maven
 - Node.js、npm
-- SQL Server（可使用 Docker 單獨啟動）
+- SQL Server（使用 Docker 單獨啟動）
 
 ---
 
@@ -22,7 +16,10 @@
 # 可選：複製環境變數範本並修改密碼
 copy .env.example .env
 
-docker compose up -d --build
+docker compose up -d --build  # 啟動
+
+docker compose down            # 停止服務
+docker compose down -v         # 停止並清除資料庫資料
 ```
 
 啟動後：
@@ -32,25 +29,6 @@ docker compose up -d --build
 | 前端 | http://localhost |
 | 後端 API | http://localhost:8080 |
 | SQL Server | localhost:1433 |
-
-### Docker 服務說明
-
-| 服務 | 說明 |
-|------|------|
-| `sqlserver` | SQL Server 2022，資料持久化於 volume |
-| `db-init` | 自動建立 `SeatingArrangement` 資料庫（僅首次執行） |
-| `backend` | Spring Boot 後端，Flyway 自動建立資料表與初始資料 |
-| `frontend` | Vue 建置後由 nginx 提供，並將 `/api` 轉發至後端 |
-
-### 常用指令
-
-```bash
-docker compose ps              # 查看服務狀態
-docker compose logs -f         # 查看日誌
-docker compose logs -f backend # 查看後端日誌
-docker compose down            # 停止服務
-docker compose down -v         # 停止並清除資料庫資料
-```
 
 ### 環境變數
 
@@ -65,17 +43,6 @@ docker compose down -v         # 停止並清除資料庫資料
 - 若本機 **1433** 埠已被佔用，請先停止其他 SQL Server 容器，或修改 `docker-compose.yml` 的 port mapping。
 - 首次啟動需等待 SQL Server healthcheck 通過，後端才會開始連線。
 
-### 相關檔案
-
-```
-docker-compose.yml      # 服務編排
-backend/Dockerfile      # 後端映像
-frontend/Dockerfile     # 前端映像
-frontend/nginx.conf     # 前端靜態檔與 API 反向代理
-docker/init-db.sql      # 資料庫初始化腳本
-.env.example            # 環境變數範本
-```
-
 ---
 
 ## 方式二：本機開發
@@ -87,6 +54,10 @@ docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" -p 1433
 ```
 
 首次使用請在 SQL Server 建立資料庫：
+
+```bash
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" -p 1433:1433 --name sqlserver -d mcr.microsoft.com/mssql/server:2022-latest
+```
 
 ```sql
 CREATE DATABASE SeatingArrangement;
@@ -120,7 +91,7 @@ npm install   # 首次執行
 npm run dev
 ```
 
-開啟終端機顯示的網址（通常為 `http://127.0.0.1:5173`）。開發模式下，前端會將 `/api` 請求轉發至後端。
+開啟終端機顯示的網址（通常為 `http://127.0.0.1:5173`）。
 
 ---
 
